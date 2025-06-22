@@ -1,18 +1,11 @@
-import gradio as gr
+import os
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
-import os
-import requests
-import time
-from threading import Thread
+import gradio as gr
+import validador_csv
 
 # Variables globales para asegurar carga dinámica del selector
 cripto_selector = None
-ultima_data = None
-
-# Lista de criptos predefinidas
-CRIPTOS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "SOLUSDT", "DOGEUSDT", "AVAXUSDT", "MATICUSDT", "DOTUSDT"]
 
 # Función: cargar historial y graficar precio + ganancia
 def generar_grafico_general():
@@ -83,29 +76,14 @@ def filtrar_por_cripto(cripto):
 def obtener_criptos():
     archivo = "ordenes.csv"
     if not os.path.exists(archivo):
-        return ["Todas"] + CRIPTOS
+        return ["Todas"]
     df = pd.read_csv(archivo)
     if 'cripto' not in df.columns:
-        return ["Todas"] + CRIPTOS
+        return ["Todas"]
     criptos = ["Todas"] + sorted(df['cripto'].dropna().unique().astype(str).tolist())
     if cripto_selector:
         cripto_selector.choices = criptos
     return criptos
-
-# Gráfico de velas japonesas en tiempo real
-def obtener_velas():
-    url = f"https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=50"
-    try:
-        response = requests.get(url)
-        data = response.json()
-        df = pd.DataFrame(data, columns=["timestamp", "o", "h", "l", "c", "v", "c2", "q", "n", "taker_buy_base", "taker_buy_quote", "ignore"])
-        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-        fig = go.Figure(data=[go.Candlestick(x=df['timestamp'], open=df['o'].astype(float), high=df['h'].astype(float),
-                                             low=df['l'].astype(float), close=df['c'].astype(float))])
-        fig.update_layout(title="💹 Velas Japonesas BTC/USDT (1m)", xaxis_title="Tiempo", yaxis_title="Precio")
-        return fig
-    except:
-        return go.Figure().update_layout(title="Error al cargar datos desde Binance")
 
 # UI con Gradio
 with gr.Blocks(title="📊 Dashboard Completo Trading IA") as demo:
@@ -131,15 +109,10 @@ with gr.Blocks(title="📊 Dashboard Completo Trading IA") as demo:
         boton_metrica = gr.Button("📊 Ver Métricas Generales")
         boton_metrica.click(fn=generar_metrica, outputs=tabla_metrica)
 
-    with gr.Tab("📉 Velas Japonesas Tiempo Real"):
-        graf_velas = gr.Plot()
-        def actualizar_auto():
-            while True:
-                time.sleep(10)
-                with demo:
-                    graf_velas.update(obtener_velas())
-        Thread(target=actualizar_auto, daemon=True).start()
-        graf_velas.render()
+    with gr.Tab("🧹 Validador CSV"):
+        salida_validacion = gr.Textbox(label="Resultado de la Validación", lines=10)
+        boton_validar = gr.Button("🧼 Validar y Corregir CSVs")
+        boton_validar.click(fn=lambda: validador_csv.validar_csvs_en_directorio("."), outputs=salida_validacion)
 
 if __name__ == "__main__":
     demo.launch()
