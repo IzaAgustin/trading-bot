@@ -3,3 +3,7 @@ pandas
 requests
 numpy
 matplotlib
+echo plotly >> requirements.txt
+git add requirements.txt
+git commit -m "Agrego plotly al requirements.txt"
+git push
