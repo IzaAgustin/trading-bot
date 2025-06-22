@@ -110,4 +110,4 @@ with gr.Blocks(title="📊 Dashboard Completo Trading IA") as demo:
         boton_metrica.click(fn=generar_metrica, outputs=tabla_metrica)
 
 if __name__ == "__main__":
-    interface.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    interface.launch(server_name="0.0.0.0", server_port=7860, share=True)
