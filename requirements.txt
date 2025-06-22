@@ -1,9 +1,1 @@
-flask
-pandas
-requests
-numpy
-matplotlib
-echo plotly >> requirements.txt
-git add requirements.txt
-git commit -m "Agrego plotly al requirements.txt"
-git push
+pandas==2.3.0numpy==2.3.0matplotlib==3.10.3plotly==6.1.2requests==2.32.4websockets==11.0.3python-dateutil==2.9.0.post0tqdm==4.67.1aiohttp==3.9.5uvicorn==0.34.0fastapi==0.115.0pydantic==2.11.2
