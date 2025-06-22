@@ -1,3 +1,5 @@
-git add requirements.txt
-git commit -m "Agrego requirements.txt con dependencias"
-git push
+flask
+pandas
+requests
+numpy
+matplotlib
