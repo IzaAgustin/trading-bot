@@ -1,13 +1,16 @@
 import time
 import pandas as pd
-from config import CRYPTO_LIST, INTERVALO_ANALISIS
+from datetime import datetime
 from simulador import Simulador
+import config_manager  # ← Nuevo módulo
+
+CRYPTO_LIST = ["BTC", "ETH", "BNB", "ADA", "SOL", "XRP", "DOT", "AVAX", "MATIC", "DOGE"]
 
 class TradingBot:
     def __init__(self):
-        self.simulador = Simulador()
         self.historial = []
         self.ordenes = []
+        self.simulador = Simulador()
 
     def analizar_mercado(self):
         datos = []
@@ -21,25 +24,29 @@ class TradingBot:
         return pd.DataFrame(datos)
 
     def ejecutar(self):
-        print("🚀 Iniciando bot de trading...")
-        for i in range(3):  # solo 3 ciclos para test
-            print(f"🔁 Ciclo {i + 1}")
-            df = self.analizar_mercado()
+        config = config_manager.cargar_config()
+        intervalo = config.get("intervalo_segundos", 10)
 
-            ahora = pd.Timestamp.now()
+        print("🚀 Iniciando bot de trading en tiempo real...")
+
+        while True:
+            print("🔄 Analizando mercado...")
+            df = self.analizar_mercado()
+            ahora = datetime.now()
             df["fecha_hora"] = ahora
             self.historial.append(df)
-            print("✅ Historial actualizado")
 
+            print("📈 Historial actualizado.")
             ordenes = self.simulador.simular_compra(df)
             self.ordenes.append(pd.DataFrame(ordenes))
-            print(f"🧪 Ordenes simuladas: {len(ordenes)}")
+            print(f"📊 Órdenes simuladas: {len(ordenes)}")
 
             pd.concat(self.historial).to_csv("historial.csv", index=False)
             pd.concat(self.ordenes).to_csv("ordenes.csv", index=False)
-            print("📁 Archivos actualizados: historial.csv y ordenes.csv")
+            print("💾 Archivos actualizados: historial.csv y ordenes.csv\n")
 
-            time.sleep(3)
+            time.sleep(intervalo)
 
-        print("🏁 Bot finalizó los ciclos de prueba.")
-
+if __name__ == "__main__":
+    bot = TradingBot()
+    bot.ejecutar()
